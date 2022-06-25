@@ -10,7 +10,7 @@ Css 预处理器是一种专门的编程语言，进行web网页样式设计，�
 ## 1.2 Sass与Scss的关系
 - Sass从第三代开始放弃了缩进风格，并且完全向下兼容普通的css代码，这一带Sass也称为Scss
 # 二、使用Sass
-## 2.1基础知识
+## 2.1 基础知识
 ### （1）Sass配置输出的四种模式
 - nested(嵌套格式), expanded（展开格式）, compact（紧凑格式）, compressed（压缩格式）
 ### （2）嵌套模式
@@ -67,7 +67,7 @@ a {
 }
 ```
 ### （5）占位符选择器 %foo (Placeholder Selectors: %foo)
-## 2.2sass基础
+## 2.2 sass基础
 ### （1）变量 $ 
 #### 1.局部变量和全局变量（!global）
 #### 2.变量默认值（!default）
@@ -112,15 +112,25 @@ body{
 
 ```
 #### 5.变量的特殊用法
+- 变量放在<span style="color:red;font-weight:800;">属性或者选择器上</span>
 - 引用样式.#{样式变量名}{}
 ```scss
 $className:main;
 .#{$className}{
   width:auto;
 }
+//css
+.main{
+  width:auto;
+}
 
 ```
-- 变量放在<span style="color:red;font-weight:800;">属性或者选择器上</span>
-- 变量中用<span style="color:red;font-weight:800;">横线，下划线</span>
-
-
+- 变量中用<span style="color:red;font-weight:800;">中横线，下划线相同</span>
+```scss
+$text_info:lightgreen;
+$text-info:red;  //会影响$text_info；中横线，下划线相同
+body{
+  color:$text_info; //呈现红色，
+}
+```
+### （2）样式的导入
