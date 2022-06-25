@@ -67,8 +67,72 @@ a {
 }
 ```
 ### （5）占位符选择器 %foo (Placeholder Selectors: %foo)
+### （6）@at-root 跳出嵌套
+#### 1.常规跳出嵌套
+- 使用@at-root
+```scss
+body{
+  color:red;
+  @at-root .container{
+    font-size:20px;
+  }
+}
+
+//css
+body{
+  color:red; 
+}
+.container{
+  font-size:20px;
+}
+```
+#### 2.@media或者@support跳出嵌套
+- 需要使用@at-root(with:media rule(关键字));@at-root(with:support rule(关键字))
+- 4种关键字:all（表示所有）;rule（常规css）;media（表示media）;support(表示support)
+```scss
+body{
+  color:red;
+  @media screen and(max-width:800px){
+    @at-root(with:media rule){
+      .container{
+        color:red;
+      }
+    }
+  }
+}
+//css
+body{
+  color:red;
+}
+.container{
+  color:red;
+}
+```
 ## 2.2 sass基础
 ### （1）变量 $ 
+#### 1数据类型
+```txt
+数字，1, 2, 13, 10px
+字符串，有引号字符串与无引号字符串，"foo", 'bar', baz
+颜色，blue, #04a3f9, rgba(255,0,0,0.5)
+布尔型，true, false
+空值，null
+数组 (list)，用空格或逗号作分隔符，1.5em 1em 0 2em, Helvetica, Arial, sans-serif
+maps, 相当于 JavaScript 的 object，(key1: value1, key2: value2)
+```
+- 使用 #{} (interpolation) 时，有引号字符串将被编译为无引号字符串，这样便于在 mixin 中引用选择器名：
+```scss
+@mixin firefox-message($selector) {
+  body.firefox #{$selector}:before {
+    content: "Hi, Firefox users!";
+  }
+}
+@include firefox-message(".header"); //字符串变成无引号，方便引用
+
+// css
+body.firefox .header:before {
+  content: "Hi, Firefox users!"; }
+```
 #### 1.局部变量和全局变量（!global）
 #### 2.变量默认值（!default）
 ```scss
@@ -111,7 +175,7 @@ body{
 } 
 
 ```
-#### 5.变量的特殊用法
+#### 5.变量的特殊用法<span style="color:red;font-weight:800;">引用样式.#{$selector}{}</span>
 - 变量放在<span style="color:red;font-weight:800;">属性或者选择器上</span>
 - 引用样式.#{样式变量名}{}
 ```scss
@@ -133,4 +197,78 @@ body{
   color:$text_info; //呈现红色，
 }
 ```
-### （2）样式的导入
+### (2)运算
+- 支持数字的加减乘除、取整等运算 (+, -, *, /, %)，相等运算 == 或 !=如果必要会在不同单位间转换值。
+```scss
+p {
+  width: 1in + 8pt;
+}
+//css
+p {
+  width: 1.111in; }
+
+```
+### （3）样式的导入
+#### 1. 部分文件的导入
+- 部分文件以<span style="color:red;font-weight:800;">下划线</span>开头,只做引入使用
+- 引入方式@import "文件名（不带下划线）"
+```scss
+//_part1.sass
+body{
+  color:red;
+}
+
+//index.sass
+@import "part1"
+
+```
+#### 2. 嵌套导入
+```scss
+```
+#### 3. 原生css的导入
+- 1. 被导入的文件名以css结尾
+- 2. 被导入文件名是一个URL地址（例如：http://xxx/a.css）
+- 3. 被导入文件名是CSS的url()值
+```scss
+```
+### （4）继承
+- 关键字 @extend 类名
+```scss
+.d1{
+  color:red;
+}
+.container{
+  @extend .d1;
+  font-size:20px;
+}
+```
+#### 1. 多个继承
+- 关键字 @extend 类名1,类名2
+```scss
+.d1{
+  color:red;
+}
+.d2{
+  background:red;
+}
+.container{
+  @extend .d1, .d2;
+  font-size:20px;
+}
+```
+#### 2. 链式继承
+- 关键字 @extend 类名1,类名2
+```scss
+.one{
+  color:red;
+}
+.two{
+  @extend .one
+  background:red;
+}
+.three{
+  @extend .two;
+  font-size:20px;
+}
+```
+
