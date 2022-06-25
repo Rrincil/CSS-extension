@@ -489,6 +489,8 @@ body{
 ### (1)内置函数
 - 颜色函数: rgb();rgba(颜色16进制,透明度);darken(颜色,加深的度);lighten(颜色,高亮度)
 - 字符串:str-length("aaaaa")（判断字符串长度）;str-index()（查找字符索引位置<span style="color:red;font-weight:800;">注意：索引从1开始</span>）
+- 百分比：percentage(1%$x);
+- 选择数组元素nth(数组,index)
 ```scss
 body{
   $x:rgb(255,0,200);
