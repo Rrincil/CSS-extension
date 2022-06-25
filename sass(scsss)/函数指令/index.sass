@@ -1,0 +1,8 @@
+$x: 40px;
+$y: 10px;
+@function grid-width($n) {
+  @return $n * $x + ($n - 1) * $y;
+}
+.one{ 
+  width: grid-width(5);
+}

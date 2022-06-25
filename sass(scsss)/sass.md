@@ -13,6 +13,7 @@ Css 预处理器是一种专门的编程语言，进行web网页样式设计，�
 ## 2.1 基础知识
 ### （1）Sass配置输出的四种模式
 - nested(嵌套格式), expanded（展开格式）, compact（紧凑格式）, compressed（压缩格式）
+- compact（紧凑格式）:输出方式比起上面两种占用的空间更少，每条 CSS 规则只占一行，包含其下的所有属性。嵌套过的选择器在输出时没有空行，不嵌套的选择器会输出空白行作为分隔符
 ### （2）嵌套模式
 ```scss
 #main p {
@@ -72,9 +73,22 @@ a {
 - %选择器名
 ```scss
 %.one{
-
+  width:20px;
 }
+//css不会编译
 
+```
+```scss
+%.one{
+  width:20px;
+}
+p{
+  @extend:.one;
+}
+//css
+p{
+  width:20px;
+}
 ```
 ### （6）@at-root 跳出嵌套
 #### 1.常规跳出嵌套
@@ -253,6 +267,18 @@ p {
   font: 12px/30px;}
 
 ```
+##### 插值语句 #{}{}
+- 通过 #{} 插值语句可以在选择器或属性名中使用变量
+```scss
+$name: foo;
+$attr: border;
+p.#{$name} {
+  #{$attr}-color: blue;
+}
+//css
+p.foo {
+  border-color: blue; }
+```
 ##### **在字符串中做运算
 - '#{变量}'
 ```scss
@@ -263,6 +289,23 @@ body{
 //css
 body{
   content:'你好哈哈'}
+```
+##### 变量定义 !default
+- 可以在变量的结尾添加 !default 给一个未通过 !default 声明赋值的变量赋值，此时，如果变量已经被赋值，不会再被重新赋值，但是如果变量还没有被赋值，则会被赋予新的值。
+- <span style="color:red;font-weight:800;">变量是 null 空值时将视为未被 !default 赋值。</span>
+```scss
+$content: "x";
+$content: "y" !default;
+$new_content: "z" !default;
+
+#main {
+  content: $content;
+  new-content: $new_content;
+}
+//css
+#main {
+  content: "x"; //以及赋值 !default不会改变
+  new-content: "z"; }
 ```
 #### 1.字符串的连接+
 - 引号字符串（位于 + 左侧）连接无引号字符串，运算结果是有引号的，相反，无引号字符串（位于 + 左侧）连接有引号字符串，运算结果则没有引号。--------<span style="color:red;font-weight:800;">以第一个字符串为标准</span>
@@ -368,7 +411,7 @@ a span, a div .container, div a .container{
   }
 }
 ```
-### (5).Mixin
+### (5)Mixin
 - @mixin 函数()
 - 使用minxin函数：@include:函数()
 ```scss
@@ -485,18 +528,124 @@ $y: 10px;
 ```
 ## 2.4条件式控制
 ### (1) if的使用
-- @if
+- @if的表达式返回值不是 false 或者 null 时，条件成立，输出 {} 内的代码：
+- @if 条件 {}@else if 条件{}@else{}
+- @if （三元表达式的运用）-----------if(条件，条件为真，条件为假)
 ```scss
+$x:2;
+p{
+  with:if($X>1;40px;50px);
+}
+h1{
+  @if $X > 2{
+    with:20px;
+  }@else if $X == 2{
+    with:10px;
+  }@else{
+    with:0px;
+  }
+}
 ```
 ### (2) for的使用
-- @for
+- @for 指令可以在限制的范围内重复输出格式，每次按要求（变量的值）对输出结果做出变动。
+- 1.@for $x from 1 to 5{} 不包含5
+- 2.@for $x from 1 through 5{}  包含5
 ```scss
+@for $x form 1 to 3{
+  .one#{$x}{
+    width:20px;
+  }
+}
+@for $x form 1 through 3{
+  .two#{$x}{
+    width:20px;
+  }
+}
+//css
+//to不包含3
+.one1{
+  width:20px;
+}
+.one2{
+  width:20px;
+}
+//throuh包含1，2，3
+.two1{
+  width:20px;
+}
+.two2{
+  width:20px;
+}
+.two3{
+  width:20px;
+}
 ```
-### (1) while的使用
-- @while
+### (2) while的使用
+- @while 设置步长
 ```scss
+$x:6;
+@while $x > 0{
+  p#{$x}{
+    width:20px*$X;
+  }
+  $x:$x - 3;
+}
+//css
+p6{
+  width:120px;
+}
+p3{
+  width:60px;
+}
 ```
-### (1) each的使用
-- @each
+### (3) each的使用
+- 1.常规遍历@each $x in red,blue,pink{}
 ```scss
+$x:4;
+@each $y in red,blue,pink{
+  div#{$x}{
+    color:$y;
+  }
+  $x:$X+1;
+}  
+//css
+div1{
+  color:red;
+}
+div2{
+  color:blue;
+}
+div3{
+  color:pink;
+}
+```
+- 2.遍历list----@each $key,$color in (one,red),(two,blue){}
+```scss
+@each $key,$color in (one,red),(two,blue){
+  div-#{$key}{
+    color:$color;
+  }
+}
+//css
+div-one{
+  color:red;
+}
+div-two{
+  color:blue;
+}
+```
+- 3.遍历map-----@each $key,$value in (one,red,two,blue){}
+```scss
+@each $key,$value in (one:red,two:blue){}
+  div-#{$key}{
+    color:$value;
+  }
+}  
+//css
+div-one{
+  color:red;
+}
+div-two{
+  color:blue;
+}
 ```

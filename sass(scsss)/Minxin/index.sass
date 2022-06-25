@@ -1,0 +1,20 @@
+@mixin cont($color:red,$font-size:20px){ //设置默认参数
+  color:$color;
+  font-size: $font-size
+}
+$x:10px;
+body{
+  @include cont(#fff,$x); //传参
+  // @include cont($color:#fff,$font-size:10px); //传参
+
+}
+=cont($color:red,$font-size:20px){ //设置默认参数
+  color:$color;
+  font-size: $font-size
+}
+$x:10px;
+body{
+  +cont(#fff,$x); //传参
+  // @include cont($color:#fff,$font-size:10px); //传参
+
+}
