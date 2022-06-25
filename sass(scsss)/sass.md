@@ -67,6 +67,15 @@ a {
 }
 ```
 ### （5）占位符选择器 %foo (Placeholder Selectors: %foo)
+- 当占位符选择器单独使用时（未通过 @extend 调用），不会编译到 CSS 文件中。
+- 只有当被继承的时候才会使用
+- %选择器名
+```scss
+%.one{
+
+}
+
+```
 ### （6）@at-root 跳出嵌套
 #### 1.常规跳出嵌套
 - 使用@at-root
@@ -108,9 +117,9 @@ body{
   color:red;
 }
 ```
-## 2.2 sass基础
+## 2.2 sass变量操作与继承
 ### （1）变量 $ 
-#### 1数据类型
+#### 1.数据类型
 ```txt
 数字，1, 2, 13, 10px
 字符串，有引号字符串与无引号字符串，"foo", 'bar', baz
@@ -120,7 +129,7 @@ body{
 数组 (list)，用空格或逗号作分隔符，1.5em 1em 0 2em, Helvetica, Arial, sans-serif
 maps, 相当于 JavaScript 的 object，(key1: value1, key2: value2)
 ```
-- 使用 #{} (interpolation) 时，有引号字符串将被编译为无引号字符串，这样便于在 mixin 中引用选择器名：
+- 使用 #{类名} () 时，有引号字符串将被编译为无引号字符串，这样便于在 mixin 中引用选择器名：
 ```scss
 @mixin firefox-message($selector) {
   body.firefox #{$selector}:before {
@@ -197,16 +206,75 @@ body{
   color:$text_info; //呈现红色，
 }
 ```
+#### 6.@media的嵌套使用
+- @media 的 queries 允许互相嵌套使用，编译时，Sass 自动添加 and
+```scss
+@media screen {
+  .sidebar {
+    @media (orientation: landscape) {
+      width: 500px;
+    }
+  }
+}
+//css
+@media screen and (orientation: landscape) {
+  .sidebar {
+    width: 500px; } }
+```
 ### (2)运算
 - 支持数字的加减乘除、取整等运算 (+, -, *, /, %)，相等运算 == 或 !=如果必要会在不同单位间转换值。
+- 关系运算 <, >, <=, >= 也可用于数字运算
+- 使用运算符要隔开<span style="color:red;font-weight:800;">空格-空格（width:$x - $y）</span>
 ```scss
 p {
   width: 1in + 8pt;
+}
+.one {
+  font: 10px/8px;    
+  $width: 1000px;
+  width: $width/2;           
+  width: round(1.5)/2;       
+  height: (500px/2);          
+  margin-left: 5px + 8px/2px; 
+  // 如果需要使用变量，同时又要确保 / 不做除法运算而是完整地编译到 CSS 文件中，只需要用 #{} 插值语句将变量包裹。
+  $font-size: 12px;
+  $line-height: 30px;
+  font: #{$font-size}/#{$line-height};
 }
 //css
 p {
   width: 1.111in; }
 
+p {
+  font: 10px/8px;
+  width: 500px;
+  height: 250px;
+  margin-left: 9px; 
+  font: 12px/30px;}
+
+```
+##### **在字符串中做运算
+- '#{变量}'
+```scss
+$x:'哈哈';
+body{
+  content:'你好#{$X}'
+}
+//css
+body{
+  content:'你好哈哈'}
+```
+#### 1.字符串的连接+
+- 引号字符串（位于 + 左侧）连接无引号字符串，运算结果是有引号的，相反，无引号字符串（位于 + 左侧）连接有引号字符串，运算结果则没有引号。--------<span style="color:red;font-weight:800;">以第一个字符串为标准</span>
+```scss
+p:before {
+  content: "Foo " + Bar;
+  font-family: sans- + "serif"; 
+}
+//css
+p:before {
+  content: "Foo Bar";
+  font-family: sans-serif; }
 ```
 ### （3）样式的导入
 #### 1. 部分文件的导入
@@ -271,4 +339,164 @@ body{
   font-size:20px;
 }
 ```
+#### 3.继承的交叉合并(应避免写法)
+- 没有在同一父级下，会产生交叉合并的编译结果
+```scss
+a span{
+  color:red;
+}
+div .container{
+  @extend span;
+}
+//css
+a span, a div .container, div a .container{
+  color:red;
+}
+```
+#### 4.继承的作用域
+- 无法在@media之外的选择器上继承，需要继承必须把样式写在指令中
+```scss
+.one{
+  color:red;
+}
+@media screen and (max-width:200px){
+  .one2{
+    color:red;
+  }
+  .container{
+    @extend .one2  //继承必须使用定在指令内部的样式
+  }
+}
+```
+### (5).Mixin
+- @mixin 函数()
+- 使用minxin函数：@include:函数()
+```scss
+@mixin cont($color:red,$font-size:20px){ //设置默认参数
+  color:$color;
+  font-size: $font-size
+}
+$x:10px;
+body{
+  @include cont(#fff,$x); //传参
+  // @include cont($color:#fff,$font-size:10px); //传参
 
+}
+//css
+body{
+  color: #fff;
+  font-size:10px;
+}
+```
+#### 1.简单示例
+- @mixin 可以用 = 表示，而 @include 可以用 + 表示，所以上面的例子可以写成
+```scss
+=cont($color:red,$font-size:20px){ //设置默认参数
+  color:$color;
+  font-size: $font-size
+}
+$x:10px;
+body{
+  +cont(#fff,$x); //传参
+  // @include cont($color:#fff,$font-size:10px); //传参
+
+}
+//css
+body{
+  color: #fff;
+  font-size:10px;
+}
+```
+#### 2.传递多值参数（参数变量）
+- 不能确定混合指令需要使用多少个参数，比如一个关于 box-shadow 的混合指令不能确定有多少个 'shadow' 会被用到。这时，可以使用参数变量 … 声明（写在参数的最后方）告诉 Sass 将这些参数视为值列表处理
+```scss
+@mixin box-shadow($shadows...) {
+  -moz-box-shadow: $shadows;
+  -webkit-box-shadow: $shadows;
+  box-shadow: $shadows;
+}
+.shadows {
+  @include box-shadow(0px 4px 5px #666, 2px 6px 10px #999);
+}
+//css
+.shadowed {
+  -moz-box-shadow: 0px 4px 5px #666, 2px 6px 10px #999;
+  -webkit-box-shadow: 0px 4px 5px #666, 2px 6px 10px #999;
+  box-shadow: 0px 4px 5px #666, 2px 6px 10px #999;
+}
+```
+#### 3.传递内容
+- 响应式布局中使用 @content
+```scss
+@mixin style-for-iphone{
+  @media only screen and(min-device-width:320px )and(max-device-width:568px){
+    @content;
+  }
+}
+//使用
+@include style-for-iphone{
+  font-size:20px;
+}
+//css编译
+@media only screen and(min-device-width:320px )and(max-device-width:568px){
+  font-size:20px;
+}
+```
+## 2.3函数指令
+### (1)内置函数
+- 颜色函数: rgb();rgba(颜色16进制,透明度);darken(颜色,加深的度);lighten(颜色,高亮度)
+- 字符串:str-length("aaaaa")（判断字符串长度）;str-index()（查找字符索引位置<span style="color:red;font-weight:800;">注意：索引从1开始</span>）
+```scss
+body{
+  $x:rgb(255,0,200);
+  color:$x;
+  background-color:rgba($x,0.5);
+  p{
+    color:darken($X,2);
+    background-color:lighten($X,0.4);
+    z-index:str-length("aaaaa");
+    z-index:str-index("abcd","c");
+  }
+}
+```
+### (2)自定义函数
+- @function 函数名(){@return 返回值}
+```scss
+$x: 40px;
+$y: 10px;
+
+@function grid-width($n) {
+  @return $n * $x + ($n - 1) * $y;
+}
+
+.one{ 
+  width: grid-width(5);
+}
+//css
+#one{
+  width: 240px; }
+```
+### (3)函数的输出
+- 控制台信息的输出：@debug '';@warn '';@error '';
+```scss
+@debug 'this is a debug message';
+@warn 'this is a warn message';
+@error 'this is a error message';
+```
+## 2.4条件式控制
+### (1) if的使用
+- @if
+```scss
+```
+### (2) for的使用
+- @for
+```scss
+```
+### (1) while的使用
+- @while
+```scss
+```
+### (1) each的使用
+- @each
+```scss
+```
